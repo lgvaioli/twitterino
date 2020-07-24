@@ -1,0 +1,72 @@
+.app {
+  font-family: "Roboto", "sans-serif";
+  color: whitesmoke;
+}
+
+.app h1 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.app input {
+  display: block;
+  margin: 20px auto 20px auto;
+  margin-top: 40px;
+  padding: 10px;
+  border-radius: 15px;
+  border: none;
+  -webkit-box-shadow: 0 0 10px 5px #0169CE;
+          box-shadow: 0 0 10px 5px #0169CE;
+}
+
+.app input::-webkit-input-placeholder {
+  font-style: italic;
+}
+
+.app input:-ms-input-placeholder {
+  font-style: italic;
+}
+
+.app input::-ms-input-placeholder {
+  font-style: italic;
+}
+
+.app input::placeholder {
+  font-style: italic;
+}
+
+.app input:focus {
+  outline: none;
+  -webkit-box-shadow: 0 0 10px 5px #004b94;
+          box-shadow: 0 0 10px 5px #004b94;
+}
+
+.app button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  border-radius: 15px;
+  border: none;
+  -webkit-box-shadow: 0 5px 0 0 #0169CE;
+          box-shadow: 0 5px 0 0 #0169CE;
+}
+
+.app button:active {
+  -webkit-box-shadow: 0 2px 0 0 #004b94;
+          box-shadow: 0 2px 0 0 #004b94;
+  -webkit-transform: translateY(4px);
+          transform: translateY(4px);
+}
+
+.app button:focus {
+  outline: none;
+}
+
+.app #chars-left {
+  font-size: 1em;
+  text-align: center;
+  margin-bottom: -30px;
+}
+/*# sourceMappingURL=App.css.map */
