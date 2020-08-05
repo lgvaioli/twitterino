@@ -18,6 +18,10 @@
   border: none;
   -webkit-box-shadow: 0 0 10px 5px #0169CE;
           box-shadow: 0 0 10px 5px #0169CE;
+  -webkit-transition: -webkit-box-shadow 0.5s;
+  transition: -webkit-box-shadow 0.5s;
+  transition: box-shadow 0.5s;
+  transition: box-shadow 0.5s, -webkit-box-shadow 0.5s;
 }
 
 .app input::-webkit-input-placeholder {

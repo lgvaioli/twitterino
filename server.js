@@ -15,40 +15,23 @@ if (process.env.DYNO) {
 }
 
 
-// Configure the Twitter strategy for use by Passport.
-//
-// OAuth 1.0-based strategies require a `verify` function which receives the
-// credentials (`token` and `tokenSecret`) for accessing the Twitter API on the
-// user's behalf, along with the user's profile.  The function must invoke `cb`
-// with a user object, which will be set at `req.user` in route handlers after
-// authentication.
+// Setup passport's Twitter authentication strategy
 passport.use(new Strategy({
-    consumerKey: process.env['TWITTER_CONSUMER_KEY'],
-    consumerSecret: process.env['TWITTER_CONSUMER_SECRET'],
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
     callbackURL: `http://127.0.0.1:${PORT}/oauth/callback`,
     proxy: trustProxy
   },
   function(token, tokenSecret, profile, cb) {
-    // In this example, the user's Twitter profile is supplied as the user
-    // record.  In a production-quality application, the Twitter profile should
-    // be associated with a user record in the application's database, which
-    // allows for account linking and authentication with other identity
-    // providers.
+    // FIXME: Here's where you check if the user is already in the database and if
+    // not, you create a new account
     profile.token = token;
     profile.tokenSecret = tokenSecret;
     return cb(null, profile);
   }));
 
 
-// Configure Passport authenticated session persistence.
-//
-// In order to restore authentication state across HTTP requests, Passport needs
-// to serialize users into and deserialize users out of the session.  In a
-// production-quality application, this would typically be as simple as
-// supplying the user ID when serializing, and querying the user record by ID
-// from the database when deserializing.  However, due to the fact that this
-// example does not have a database, the complete Twitter profile is serialized
-// and deserialized.
+// Setup passport stuff
 passport.serializeUser(function(user, cb) {
   cb(null, user);
 });
@@ -67,13 +50,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Use application-level middleware for common functionality, including
-// logging, parsing, and session handling.
+// Setup body parser and session middleware
 app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 
-// Initialize Passport and restore authentication state, if any, from the
-// session.
+// Initialize Passport and restore authentication state, if any, from the session.
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -91,6 +72,22 @@ app.get('/',
 // This MUST come after the GET '/' route handler, because otherwise instead of hitting
 // that handler, express.static automatically returns the frontend's index.html
 app.use(express.static('./frontend/build'));
+
+app.get('/user', (req, res) => {
+  // I don't want to have the frontend dealing with Twitter's bullshit, so I return a nice user object
+  // instead of Twitter's monstrosity.
+  const niceUser = {
+    username: req.user.username,
+    twitterId: req.user.id,
+    profilePicUrl: req.user.photos[0].value,
+    tweetsCount: req.user._json.statuses_count,
+    following: req.user._json.friends_count,
+    followers: req.user._json.followers_count,
+    currentStatus: req.user._json.status.text,
+  };
+
+  res.json(niceUser);
+});
 
 app.get('/login',
   function(req, res){
@@ -123,7 +120,7 @@ app.post("/message", (req, res) => {
     const message = req.body.message;
     const params = { status: message };
 
-    console.log(`About to post a message for this user: ${JSON.stringify(req.user)}`);
+    console.log(`User '${req.user.username}' is a about to post the following: ${message}`);
 
     // FIXME: Is this how am I supposed to do this? It feels inefficient. Maybe you
     // can create a twitter client and reuse it across users? I'm not sure, the docs suck.

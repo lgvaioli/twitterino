@@ -1,0 +1,18 @@
+.UserInfoView {
+  background-color: #0D61FB;
+  padding: 15px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.UserInfoView img {
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.UserInfoView p {
+  margin-right: 20px;
+  margin-top: 15px;
+}
+/*# sourceMappingURL=UserInfoView.css.map */

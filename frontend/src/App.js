@@ -1,5 +1,7 @@
 import React from 'react';
 import './css/App.css';
+import UserInfoView from './UserInfoView';
+
 
 const TWITTER_MAX_LENGTH = 280;
 const TWITTER_LENGTH_WARNING = (TWITTER_MAX_LENGTH / 100) * 50; // 50%
@@ -7,8 +9,10 @@ const TWITTER_LENGTH_WARNING = (TWITTER_MAX_LENGTH / 100) * 50; // 50%
 class App extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       input: "",
+      user: { },
     }
   }
 
@@ -47,12 +51,32 @@ class App extends React.Component {
     };
 
     fetch("/message", requestOptions)
-      .then(response => response.text())
-      .then(result => alert(result))
-      .catch(error => alert(error));
+      .then(response => {
+        if (response.status == 200) {
+          // Success; update app state and show success alert
 
-    // Empty input
-    this.setState({input: ""});
+          const user = { ...this.state.user };
+          user.tweetsCount += 1;
+          user.currentStatus = this.state.input;
+
+          this.setState({ user: user, input: "" });
+
+          alert('Tweet was successful!');
+        } else {
+          // Failure
+          alert(`Could not tweet message: ${response.text()}`);
+        }
+      })
+      .catch(error => alert(`Unexpected error: ${error}`));
+  }
+
+  componentDidMount() {
+    fetch("/user")
+      .then(response => response.json())
+      .then(data => {
+        this.setState({ user: data });
+      })
+      .catch(error => alert(error));
   }
 
   render() {
@@ -62,6 +86,7 @@ class App extends React.Component {
 
     return (
       <div className="app">
+      <UserInfoView user={this.state.user} />
       <h1>Let's tweet a message!</h1>
       <p
         id="chars-left"
