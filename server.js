@@ -1,53 +1,55 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
 require('dotenv').config();
 
-var express = require('express');
-var passport = require('passport');
-var Strategy = require('passport-twitter').Strategy;
+const express = require('express');
+const passport = require('passport');
+const { Strategy } = require('passport-twitter');
 const Twitter = require('twitter');
 
-// Careful with this, it's gotta match whatever callback_url you configured in your Twitter app
-const PORT = 7500;
+const PORT = parseInt(process.env.PORT, 10) || 4000;
+const APP_BASEURL = process.env.APP_URL || 'http://127.0.0.1';
+const APP_FULLURL = `${APP_BASEURL}:${PORT}`;
+const APP_CALLBACKURL = `${APP_FULLURL}/oauth/callback`;
 
-var trustProxy = false;
+let trustProxy = false;
 if (process.env.DYNO) {
   // Apps on heroku are behind a trusted proxy
   trustProxy = true;
 }
 
-
 // Setup passport's Twitter authentication strategy
 passport.use(new Strategy({
-    consumerKey: process.env.TWITTER_CONSUMER_KEY,
-    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-    callbackURL: `http://127.0.0.1:${PORT}/oauth/callback`,
-    proxy: trustProxy
-  },
-  function(token, tokenSecret, profile, cb) {
-    // FIXME: Here's where you check if the user is already in the database and if
-    // not, you create a new account
-    profile.token = token;
-    profile.tokenSecret = tokenSecret;
-    return cb(null, profile);
-  }));
-
+  consumerKey: process.env.TWITTER_CONSUMER_KEY,
+  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+  callbackURL: APP_CALLBACKURL,
+  proxy: trustProxy,
+},
+(token, tokenSecret, profile, cb) => {
+  // FIXME: Here's where you check if the user is already in the database and if
+  // not, you create a new account
+  profile.token = token;
+  profile.tokenSecret = tokenSecret;
+  return cb(null, profile);
+}));
 
 // Setup passport stuff
-passport.serializeUser(function(user, cb) {
+passport.serializeUser((user, cb) => {
   cb(null, user);
 });
 
-passport.deserializeUser(function(obj, cb) {
+passport.deserializeUser((obj, cb) => {
   cb(null, obj);
 });
 
-
 // Create a new Express application.
-var app = express();
+const app = express();
 
 // Log every request, for debugging purposes
 app.use((req, res, next) => {
-    console.log(`Got following request: ${req.url}`);
-    next();
+  console.log(`Got following request: ${req.url}`);
+  next();
 });
 
 // Setup body parser and session middleware
@@ -58,14 +60,13 @@ app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave:
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // Define routes.
 app.get('/',
-  function(req, res) {
+  (req, res) => {
     if (req.user) {
-        res.sendFile('index.html', { root: './frontend/build/' });
+      res.sendFile('index.html', { root: './frontend/build/' });
     } else {
-        res.redirect('/login/twitter');
+      res.redirect('/login/twitter');
     }
   });
 
@@ -74,8 +75,8 @@ app.get('/',
 app.use(express.static('./frontend/build'));
 
 app.get('/user', (req, res) => {
-  // I don't want to have the frontend dealing with Twitter's bullshit, so I return a nice user object
-  // instead of Twitter's monstrosity.
+  // I don't want to have the frontend dealing with Twitter's bullshit, so I return
+  // a nice user object instead of Twitter's monstrosity.
   const niceUser = {
     username: req.user.username,
     twitterId: req.user.id,
@@ -90,7 +91,7 @@ app.get('/user', (req, res) => {
 });
 
 app.get('/login',
-  function(req, res){
+  (req, res) => {
     res.send('FIXME: Implement /login');
   });
 
@@ -99,48 +100,48 @@ app.get('/login/twitter',
 
 app.get('/oauth/callback',
   passport.authenticate('twitter', { failureRedirect: '/login' }),
-  function(req, res) {
+  (req, res) => {
     res.redirect('/');
   });
 
 app.get('/profile',
   require('connect-ensure-login').ensureLoggedIn(),
-  function(req, res){
+  (req, res) => {
     res.render('profile', { user: req.user });
   });
 
 app.get('/logout',
-  function(req, res) {
-    req.session.destroy(function (err) {
+  (req, res) => {
+    req.session.destroy(() => {
       res.redirect('/');
     });
   });
 
-app.post("/message", (req, res) => {
-    const message = req.body.message;
-    const params = { status: message };
+app.post('/message', (req, res) => {
+  const { message } = req.body;
+  const params = { status: message };
 
-    console.log(`User '${req.user.username}' is a about to post the following: ${message}`);
+  console.log(`User '${req.user.username}' is a about to post the following: ${message}`);
 
-    // FIXME: Is this how am I supposed to do this? It feels inefficient. Maybe you
-    // can create a twitter client and reuse it across users? I'm not sure, the docs suck.
-    const twitter = new Twitter({
-        consumer_key: process.env.TWITTER_CONSUMER_KEY,
-        consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-        access_token_key: req.user.token,
-        access_token_secret: req.user.tokenSecret,
-      });
-    
-    twitter.post("statuses/update.json", params, function(error, tweets, response) {
-        if (!error) {
-            if(tweets.created_at !== "") {
-                res.end("Successfully posted!")
-            }
-        } else {
-            const twitterError = "Twitter error: " + error[0].message;
-            res.end(twitterError);
-        }
-    });
+  // FIXME: Is this how am I supposed to do this? It feels inefficient. Maybe you
+  // can create a twitter client and reuse it across users? I'm not sure, the docs suck.
+  const twitter = new Twitter({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token_key: req.user.token,
+    access_token_secret: req.user.tokenSecret,
+  });
+
+  twitter.post('statuses/update.json', params, (error, tweets) => {
+    if (!error) {
+      if (tweets.created_at !== '') {
+        res.end('Successfully posted!');
+      }
+    } else {
+      const twitterError = `Twitter error: ${error[0].message}`;
+      res.end(twitterError);
+    }
+  });
 });
 
 app.listen(PORT, (err) => {
@@ -148,5 +149,5 @@ app.listen(PORT, (err) => {
     return console.log(`Could not set server to listen: ${err}`);
   }
 
-  console.log(`Server listening at http://127.0.0.1:${PORT}`);
+  return console.log(`Server listening at http://127.0.0.1:${PORT}`);
 });
