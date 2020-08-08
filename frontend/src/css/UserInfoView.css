@@ -9,6 +9,8 @@
 .UserInfoView img {
   margin-right: 10px;
   border-radius: 50%;
+  max-width: 48px;
+  max-height: 48px;
 }
 
 .UserInfoView p {

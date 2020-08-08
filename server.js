@@ -8,8 +8,8 @@ const passport = require('passport');
 const { Strategy } = require('passport-twitter');
 const Twitter = require('twitter');
 
-const PORT = parseInt(process.env.PORT, 10) || 4000;
-const APP_URL = process.env.APP_URL || 'http://127.0.0.1';
+const PORT = parseInt(process.env.PORT, 10) || 7500;
+const APP_URL = process.env.APP_URL || `http://127.0.0.1:${PORT}`;
 const APP_CALLBACKURL = `${APP_URL}/oauth/callback`;
 
 let trustProxy = false;
@@ -148,5 +148,5 @@ app.listen(PORT, (err) => {
     return console.log(`Could not set server to listen: ${err}`);
   }
 
-  return console.log(`Server listening at ${APP_URL}...`);
+  return console.log(`Server listening at ${APP_URL}`);
 });
