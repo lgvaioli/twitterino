@@ -149,5 +149,5 @@ app.listen(PORT, (err) => {
     return console.log(`Could not set server to listen: ${err}`);
   }
 
-  return console.log(`Server listening at http://127.0.0.1:${PORT}`);
+  return console.log(`Server listening at ${APP_FULLURL}`);
 });
