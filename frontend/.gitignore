@@ -9,7 +9,8 @@
 /coverage
 
 # production
-/build
+# The easiest way to push the files to Heroku is to just commit them
+# /build
 
 # misc
 .DS_Store
