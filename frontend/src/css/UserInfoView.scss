@@ -1,7 +1,8 @@
 .UserInfoView {
   background-color: #0D61FB;
   padding: 15px;
-  display: flex;
+  display: inline-flex;
+  min-width: 100vw;
 
   img {
     margin-right: 10px;

@@ -12,7 +12,6 @@ function UserInfoView(props) {
     <div className='UserInfoView'>
     <img src={props.user.profilePicUrl} alt="profile pic" />
     <p>Username: <b>{props.user.username}</b></p>
-    <p>Twitter ID: <b>{props.user.twitterId}</b></p>
     <p>Following: <b>{props.user.following}</b></p>
     <p>Followers: <b>{props.user.followers}</b></p>
     <p>Tweets count: <b>{props.user.tweetsCount}</b></p>
